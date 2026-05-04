@@ -1,0 +1,84 @@
+const texts = [
+    "Typing fast requires practice and patience",
+    "JavaScript makes web pages interactive and dynamic",
+    "Practice daily to improve your typing speed",
+    "Coding is fun when you understand the logic"
+];
+
+let timer;
+let timeLeft = 60;
+let currentText = "";
+let started = false;
+
+function loadText() {
+    currentText = texts[Math.floor(Math.random() * texts.length)];
+    document.getElementById("textDisplay").innerText = currentText;
+}
+
+function startTest() {
+    if (started) return;
+    started = true;
+
+    loadText();
+    document.getElementById("inputText").disabled = false;
+    document.getElementById("inputText").focus();
+
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("time").innerText = timeLeft;
+
+        if (timeLeft === 0) {
+            clearInterval(timer);
+            finishTest();
+        }
+    }, 1000);
+}
+
+function finishTest() {
+    let input = document.getElementById("inputText").value;
+
+    let wordsTyped = input.trim().split(" ").length;
+    let wpm = wordsTyped;
+
+    let correctChars = 0;
+    for (let i = 0; i < input.length; i++) {
+        if (input[i] === currentText[i]) {
+            correctChars++;
+        }
+    }
+
+    let accuracy = ((correctChars / currentText.length) * 100).toFixed(2);
+
+    document.getElementById("wpm").innerText = wpm;
+    document.getElementById("accuracy").innerText = accuracy;
+
+    // Store best score
+    let best = localStorage.getItem("bestWPM") || 0;
+    if (wpm > best) {
+        localStorage.setItem("bestWPM", wpm);
+        best = wpm;
+    }
+
+    document.getElementById("best").innerText = best;
+}
+
+function restartTest() {
+    clearInterval(timer);
+    timeLeft = 60;
+    started = false;
+
+    document.getElementById("time").innerText = timeLeft;
+    document.getElementById("inputText").value = "";
+    document.getElementById("inputText").disabled = true;
+    document.getElementById("wpm").innerText = 0;
+    document.getElementById("accuracy").innerText = 0;
+
+    loadText();
+}
+
+// Load best score on page load
+window.onload = function () {
+    let best = localStorage.getItem("bestWPM") || 0;
+    document.getElementById("best").innerText = best;
+    loadText();
+};
